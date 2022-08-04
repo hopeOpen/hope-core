@@ -2,5 +2,11 @@
   "extends": "eslint-config-egg/typescript",
   "parserOptions": {
     "project": "./tsconfig.json"
+  },
+  "rules": {
+    // require 使用
+    "@typescript-eslint/no-var-requires": 0,
+    // 函数是否一定需要返回值
+    "space-before-function-paren": false,
   }
 }
