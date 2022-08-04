@@ -1,6 +1,7 @@
 import { Controller } from 'egg';
 import{ Post, Control } from '../../lib/requestMapping/decorator/httpMethod.decorator';
 import { verificationInfoFormat } from '../../utils/index';
+import { BadRequestException } from '../../exception/bad-request.exception';
 
 @Control('user')
 export default class UserController extends Controller {
@@ -12,6 +13,9 @@ export default class UserController extends Controller {
   public async login() {
     const { ctx, app } = this;
     const { body } = ctx.request;
+    if(!body.name || !body.password) {
+      throw new BadRequestException("用户名或密码不能为空");
+    }
     const result = await ctx.service.user.login(body);
     const { token } = result;
     const jwtToken = ctx.app.jwt.sign(
@@ -21,12 +25,24 @@ export default class UserController extends Controller {
       },
       app.config.jwt.secret,
       {
-        // 时间根据自己定，具体可参考jsonwebtoken插件官方说明
-        expiresIn: app.config.jwt.sign.expiresIn
+        // 时间根据自己定，具体可参考jsonwebtoken插件官方说明 
+        expiresIn: '1d'
       },
     );
+    ctx.cookies.set(app.config.tokenField, jwtToken, {
+      // 设置cookie的有效期 毫秒
+      maxAge: 60 * 60 * 1000, 
+      // 只允许服务端访问cookie    
+      httpOnly: true,
+      // 对cookie进行签名，防止用户修改cookie
+      signed: true,  
+      // 是否对cookie进行加密
+      // cookie加密后获取的时候要对cookie进行解密  
+      // cookie加密后就可以设置中文cookie 
+      encrypt: true
+    })
     ctx.body = {
-      token: jwtToken,
+      code: 200,
       message: '登录成功',
     };
   }

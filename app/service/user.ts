@@ -104,12 +104,18 @@ export default class UserService extends Service {
    */
   public async userInfo(id: number) {
     const { ctx } = this;
+    if(!id) {
+      throw new BadRequestException("id is required");
+    }
     const user = await ctx.model.User.findOne({
       where: {
         id,
       },
       attributes: [ 'id', 'name', 'email', 'roles', 'desc' ],
     });
+    if(!user) {
+      throw new BadRequestException("用户不存在");
+    }
     user.roles = JSON.parse(user.roles);
     return user;
   }

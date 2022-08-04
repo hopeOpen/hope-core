@@ -14,10 +14,11 @@ export default function ResponseFormatMiddleware() {
         code: 500,
         message: '服务器错误'
       };
-    } else if(ctx.body.__proto__ == TypeError.prototype) {
+    } else if(ctx.body.__proto__ == TypeError.prototype || ctx.body.__proto__ == Error.prototype) {
       ctx.body = {
         code: 500,
-        message: ctx.body.message,
+        // message: ctx.body.message,
+        message: '服务器错误',
       };
     } else if (ctx.body !== undefined && !ctx.noResponseFormat) {
       ctx.status = ctx.status === 204 ? 200 : ctx.status;

@@ -46,7 +46,7 @@ export default (appInfo: EggAppInfo) => {
     // jwt.sign(***,***,[options,***])方法中，options的默认设置可以在这里配置；
     sign: {
       // 多少s后过期。actionToken.js中,jwt.sing(plyload,secret,{expiresIn:number})会被合并，调用时设置优先级更高;
-      expiresIn: process.env.JWT_EXPIRES,
+      expiresIn: process.env.JWT_EXPIRES || 60 * 10 ,
     },
   };
 
@@ -63,7 +63,7 @@ export default (appInfo: EggAppInfo) => {
     // 允许访问接口的白名单
     domainWhiteList: [ '*' ],
   };
-  console.log('process.env.DB_HOST---', process.env);
+  
   /* 连接mysql配置 */
   config.sequelize = {
     // 数据库类型
@@ -111,7 +111,7 @@ export default (appInfo: EggAppInfo) => {
   // api 前缀
   config.apiPrefix = process.env.API_PREFIX || 'hope-api';
   // token字段
-  config.tokenField = process.env.TOKEN_PREFIX || 'hope-token';
+  config.tokenField = process.env.TOKEN_PREFIX || 'hope_token';
 
   // the return config will combines to EggAppConfig
   return {

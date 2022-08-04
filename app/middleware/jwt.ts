@@ -13,8 +13,13 @@ module.exports = () => {
       await next();
     } else {
       // 拿到传会数据的header 中的token值
-      const token = request.header[tokenField];
+      // const token = request.header[tokenField];
+      const token = ctx.cookies.get(tokenField, {
+        // 获取加密的cookie,要加上{encrypt:true}
+        encrypt: true
+      });
       if (!token) {
+        ctx.SUCCESS_CODE = -1
         ctx.throw(401, '未登录， 请先登录');
       } else { // 当前token值存在
         // 解码token
@@ -31,6 +36,7 @@ module.exports = () => {
         });
 
         if (decode === 'TokenExpiredError') {
+          ctx.SUCCESS_CODE = -1
           ctx.body = {
             code: 401,
             msg: '登录过期, 请重新登录',
@@ -39,6 +45,7 @@ module.exports = () => {
         }
 
         if (decode === 'JsonWebTokenError') {
+          ctx.SUCCESS_CODE = -1
           ctx.body = {
             code: 401,
             msg: 'token无效, 请重新登录',
