@@ -1,5 +1,5 @@
 import {HttpException} from './http.exception';
-import {HttpStatus} from './http-status.enum';
+import {HttpStatus} from './httpStatus.enum';
 /**
  * 常规不可操作异常
  */

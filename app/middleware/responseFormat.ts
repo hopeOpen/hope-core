@@ -22,9 +22,8 @@ export default function ResponseFormatMiddleware() {
       };
     } else if (ctx.body !== undefined && !ctx.noResponseFormat) {
       ctx.status = ctx.status === 204 ? 200 : ctx.status;
-      const successCode = ctx.SUCCESS_CODE !== undefined ? ctx.SUCCESS_CODE : 1000;
       ctx.body = {
-        code: successCode,
+        code: ctx.STATUS_CODE || 200,
         data: ctx.body,
         message: 'success',
       };

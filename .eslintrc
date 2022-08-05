@@ -7,6 +7,14 @@
     // require 使用
     "@typescript-eslint/no-var-requires": 0,
     // 函数是否一定需要返回值
-    "space-before-function-paren": false,
+    "space-before-function-paren": false
+  },
+  "settings": {
+    "import/resolver": {
+      "alias": {
+        "map": [["@app", "./app"]],
+        "extensions": [".tsx", ".ts", ".jsx", ".js"]
+      }
+    }
   }
 }

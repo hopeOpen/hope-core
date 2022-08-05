@@ -1,5 +1,5 @@
 import {HttpException} from './http.exception';
-import {HttpStatus} from './http-status.enum';
+import {HttpStatus} from './httpStatus.enum';
 
 /**
  * 参数格式错误异常

@@ -45,5 +45,9 @@
     "app/public",
     "app/views",
     "node_modules*"
-  ]
+  ],
+  "baseUrl": "./",
+  "path": {
+    "@app": ["./app"]
+  }
 }
