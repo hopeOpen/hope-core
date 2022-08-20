@@ -35,7 +35,7 @@ export default class UserController extends Controller {
       // 设置cookie的有效期 毫秒
       maxAge: 60 * 60 * 1000, 
       // 只允许服务端访问cookie    
-      httpOnly: true,
+      httpOnly: false,
       // 对cookie进行签名，防止用户修改cookie
       signed: true,  
       // 是否对cookie进行加密
@@ -130,8 +130,6 @@ export default class UserController extends Controller {
     return '删除成功'
   }
   
-
-
 }
 
 

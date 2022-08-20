@@ -19,7 +19,10 @@ export default (app: Application) => {
 
   // 加载路由
   const requestMapping = new RequestMapping();
-  // api 前缀
+  // 用户
   requestMapping.scanController(app, 'user', config.apiPrefix, [middleware.jwt(config.jwt)]);
-
+  // 菜单权限
+  requestMapping.scanController(app, 'menu', config.apiPrefix, [middleware.jwt(config.jwt)]);
+  // 试卷
+  requestMapping.scanController(app, 'paper', config.apiPrefix, [middleware.jwt(config.jwt)]);
 };
