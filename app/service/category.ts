@@ -6,7 +6,6 @@ export default class CategoryService extends Service {
    * @param query
    */
   async addCategory (query) {
-    console.log(query);
     const result = await this.ctx.model.Category.create(query);
     if (!result) throw new BadRequestException('新增分类失败');
     const { id, categoryName, categoryLevel, parentId } = result;

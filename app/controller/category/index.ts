@@ -1,5 +1,6 @@
 import { Controller } from "egg";
 import { Post, Control } from "../../lib/requestMapping/decorator/httpMethod.decorator";
+import { Body } from '../../lib/requestMapping/decorator/routerParams.decorator';
 import { BadRequestException } from "../../exception/badRequest.exception";
 
 @Control('paper')
@@ -8,9 +9,8 @@ export default class CategoryController extends Controller {
    * 添加题目
    */
   @Post("add-category")
-  public async addCategory() {
+  public async addCategory(@Body() body: any) {
     const { ctx } = this;
-    const { body } = ctx.request;
     const { categoryLevel, parentId, categoryName } = body;
     if(!categoryName) {
       throw new BadRequestException('分类名称不能为空');
