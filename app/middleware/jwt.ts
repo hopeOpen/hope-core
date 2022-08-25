@@ -1,4 +1,12 @@
 
+import { AuthenticationFailedException } from '../exception/authenticationFailed.exception';
+import { HttpStatus } from '../exception/httpStatus.enum';
+import { Context } from 'egg';
+
+const throwError = (ctx: Context, message: string) => {
+  ctx.STATUS_CODE = HttpStatus.UNAUTHORIZED
+  throw new AuthenticationFailedException(message);
+}
 
 module.exports = () => {
   return async function jwt(ctx, next) {
@@ -19,8 +27,7 @@ module.exports = () => {
         encrypt: true
       });
       if (!token) {
-        ctx.SUCCESS_CODE = -1
-        ctx.throw(401, '未登录， 请先登录');
+        throwError(ctx, '未登录， 请先登录');
       } else { // 当前token值存在
         // 解码token
         const decode = await ctx.app.jwt.verify(token, app.config.jwt.secret, (err, decoded) => {
@@ -36,21 +43,11 @@ module.exports = () => {
         });
 
         if (decode === 'TokenExpiredError') {
-          ctx.SUCCESS_CODE = -1
-          ctx.body = {
-            code: 401,
-            msg: '登录过期, 请重新登录',
-          };
-          return;
+          throwError(ctx, '登录过期, 请重新登录');
         }
 
         if (decode === 'JsonWebTokenError') {
-          ctx.SUCCESS_CODE = -1
-          ctx.body = {
-            code: 401,
-            msg: 'token无效, 请重新登录',
-          };
-          return;
+          throwError(ctx, '凭证无效, 请重新登录');
         }
         await next();
       }

@@ -1,4 +1,6 @@
-import { OperationNotAllowedException } from "../exception/operate-not-allowed.exception";
+import { Context } from "egg";
+import { OperationNotAllowedException } from "../exception/operateNotAllowed.exception";
+import { HttpStatus } from '../exception/httpStatus.enum';
 
 // 是否为空对象
 export const isEmptyObject = (val: object) => {
@@ -16,7 +18,7 @@ export const isEmptyObject = (val: object) => {
  * @param body 请求参数
  * @returns
  */
-export const verificationInfoFormat = (needs: string[], body: any) => {
+export const verificationInfoFormat = (needs: string[], body: any, ctx:Context) => {
   const defaultRule = {
     name: {
       reg: /^[a-zA-Z0-9_]{3,18}$/,
@@ -34,6 +36,7 @@ export const verificationInfoFormat = (needs: string[], body: any) => {
 
   needs.forEach((key) => {
     if (!defaultRule[key].reg.test(body[key])) {
+      ctx.STATUS_CODE = HttpStatus.FORBIDDEN;
       throw new OperationNotAllowedException(defaultRule[key].message);
     }
   });

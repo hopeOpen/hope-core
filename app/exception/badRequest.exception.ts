@@ -1,5 +1,5 @@
 import { HttpException } from './http.exception';
-import { HttpStatus } from './http-status.enum';
+import { HttpStatus } from './httpStatus.enum';
 
 // import {HttpStatus} from './http-status.enum';
 

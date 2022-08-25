@@ -4,14 +4,13 @@ import * as fs from 'fs';
 import { ROUTE_ARGS_METADATA, ROUTE_HANDLE_METADATA, 
   ROUTE_CONTROLLER_METADATA, ROUTE_METHOD_METADATA, 
   ROUTE_URL_METADATA, UPLOAD_FILE_METADATA,
-  ReflectDefaultMetadata } from './constant';
+  ReflectDefaultMetadata, RouteParamtypesEnum } from './constant';
 
 
 export interface RouteHandlerInterface {
   methodName: string; // 方法名
   httpMethod: string; // 请求类型
   urlPath: string; // 路由地址
-  // handlerArgs: RouteParamMetadataInterface; // 方法参数数据
   uploadFile: UploadFileConfigInterface; // 是否上传文件
   handlerArgs: any; // 方法参数数据
 }
@@ -82,7 +81,7 @@ export class RequestMapping {
           methodName,
           httpMethod,
           urlPath,
-          // handlerArgs,
+          handlerArgs,
           uploadFile,
         } = handler;
         const urls = [routePrefix || '', ctrlPrefix, urlPath];
@@ -98,9 +97,9 @@ export class RequestMapping {
           if (uploadFile) {
             // ctx.request.file = await this.getUploadFile(ctx, uploadFile);
           }
-          // const params: any[] = await this.getRouteParams(ctx, handlerArgs);
+          const params: any[] = await this.getRouteParams(ctx, handlerArgs);
           // 调用实例中的方法
-          const result = await instance[methodName]();
+          const result = await instance[methodName](...params);
           if (ctx.body === undefined && result !== undefined) {
             ctx.body = result;
           }
@@ -269,6 +268,52 @@ export class RequestMapping {
     //   filepath,
     //   ...JSON.parse(JSON.stringify(fileStream)),
     // };
+  }
+
+  /**
+   * 获取参数
+   * @param {"egg".Context} ctx
+   * @param {} handlerArgs
+   */
+  getRouteParams(ctx: Context, handlerArgs: any) {
+    const params: any[] = [];
+    for (const key of Object.keys(handlerArgs)) {
+      const {
+        paramIndex,
+        paramtype,
+        propName,
+      } = handlerArgs[key];
+      let param: any;
+      switch (paramtype) {
+        case RouteParamtypesEnum.REQUEST:
+          param = ctx.request;
+          break;
+        case RouteParamtypesEnum.RESPONSE:
+          param = ctx.response;
+          break;
+        case RouteParamtypesEnum.BODY:
+          param = propName ? ctx.request.body[propName] : ctx.request.body;
+          break;
+        case RouteParamtypesEnum.QUERY:
+          param = propName ? ctx.request.query[propName] : ctx.request.query;
+          break;
+        case RouteParamtypesEnum.PARAM:
+          param = propName ? ctx.params[propName] : ctx.params;
+          break;
+        case RouteParamtypesEnum.HEADERS:
+          param = propName ? ctx.request.headers[propName] : ctx.request.headers;
+          break;
+          // TODO: 暂时不对文件处理
+        case RouteParamtypesEnum.FILE_STREAM:
+          // const fileStream = await ctx.getFileStream();
+          // param = fileStream;
+          break;
+        default:
+          break;
+      }
+      params[paramIndex] = param;
+    }
+    return params;
   }
 
 }

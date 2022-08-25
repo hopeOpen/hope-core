@@ -1,7 +1,8 @@
 import { Controller } from 'egg';
 import{ Post, Control } from '../../lib/requestMapping/decorator/httpMethod.decorator';
 import { verificationInfoFormat } from '../../utils/index';
-import { BadRequestException } from '../../exception/bad-request.exception';
+import { BadRequestException } from '../../exception/badRequest.exception';
+import { HttpStatus } from '../../exception/httpStatus.enum';
 
 @Control('user')
 export default class UserController extends Controller {
@@ -14,6 +15,7 @@ export default class UserController extends Controller {
     const { ctx, app } = this;
     const { body } = ctx.request;
     if(!body.name || !body.password) {
+      ctx.STATUS_CODE = HttpStatus.BAD_REQUEST;
       throw new BadRequestException("用户名或密码不能为空");
     }
     const result = await ctx.service.user.login(body);
@@ -33,7 +35,7 @@ export default class UserController extends Controller {
       // 设置cookie的有效期 毫秒
       maxAge: 60 * 60 * 1000, 
       // 只允许服务端访问cookie    
-      httpOnly: true,
+      httpOnly: false,
       // 对cookie进行签名，防止用户修改cookie
       signed: true,  
       // 是否对cookie进行加密
@@ -60,7 +62,7 @@ export default class UserController extends Controller {
     const { ctx } = this;
     const { body } = ctx.request;
     // 校验参数格式
-    verificationInfoFormat(['name', 'email', 'password'],body);
+    verificationInfoFormat(['name', 'email', 'password'],body, ctx);
     // 校验用户名是否重复
     await ctx.service.user.checkName(body);
     // TODO:校验邮箱是否重复
@@ -111,7 +113,7 @@ export default class UserController extends Controller {
     const { ctx } = this;
     const { body } = ctx.request;
     // 校验格式
-    verificationInfoFormat(['name', 'email'],body);
+    verificationInfoFormat(['name', 'email'],body, ctx);
     // 检验是否有重复的用户名
     await ctx.service.user.checkName(body);
     return await ctx.service.user.updateUser(body);
@@ -128,8 +130,6 @@ export default class UserController extends Controller {
     return '删除成功'
   }
   
-
-
 }
 
 

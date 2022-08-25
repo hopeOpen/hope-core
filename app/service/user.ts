@@ -1,8 +1,9 @@
 import { Service } from 'egg';
 import { LoginQuery, UserInfo, UpdateUserInfoType } from '../../interface/user';
 import { ParamFormatErrorException } from '../exception/paramFormatError.exception'
-import { BadRequestException } from '../exception/bad-request.exception';
+import { BadRequestException } from '../exception/badRequest.exception';
 import { SHA256 } from 'crypto-js';
+import { HttpStatus } from '../exception/httpStatus.enum';
 /**
  * User Service
  */
@@ -20,10 +21,12 @@ export default class UserService extends Service {
       }
     })
     if(!user) {
+      ctx.STATUS_CODE = HttpStatus.BAD_REQUEST;
       throw new BadRequestException("用户不存在");
     }
     const token = this.createdUserToken(query);
     if(token !== user.token) {
+      ctx.STATUS_CODE = HttpStatus.BAD_REQUEST;
       throw new BadRequestException("密码错误");
     }
     return user;
@@ -95,6 +98,7 @@ export default class UserService extends Service {
       },
     });
     if(user && body.id !== user.id) {
+      ctx.STATUS_CODE = HttpStatus.BAD_REQUEST;
       throw new ParamFormatErrorException("用户名已存在");
     }
   }
@@ -105,6 +109,7 @@ export default class UserService extends Service {
   public async userInfo(id: number) {
     const { ctx } = this;
     if(!id) {
+      ctx.STATUS_CODE = HttpStatus.BAD_REQUEST;
       throw new BadRequestException("id is required");
     }
     const user = await ctx.model.User.findOne({
@@ -114,6 +119,7 @@ export default class UserService extends Service {
       attributes: [ 'id', 'name', 'email', 'roles', 'desc' ],
     });
     if(!user) {
+      ctx.STATUS_CODE = HttpStatus.BAD_REQUEST;
       throw new BadRequestException("用户不存在");
     }
     user.roles = JSON.parse(user.roles);

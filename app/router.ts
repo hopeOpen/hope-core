@@ -1,5 +1,7 @@
 import { Application } from 'egg';
 import { RequestMapping } from './lib';
+import * as path from 'path';
+import * as fs from 'fs';
 
 export default (app: Application) => {
   const { middleware, config } = app;
@@ -19,7 +21,20 @@ export default (app: Application) => {
 
   // 加载路由
   const requestMapping = new RequestMapping();
-  // api 前缀
-  requestMapping.scanController(app, 'user', config.apiPrefix, [middleware.jwt(config.jwt)]);
 
+  // 自动加载 比如[ 'category', 'menu', 'paper', 'user' ]
+  const dir = path.join(__dirname, './controller');
+  const files = fs.readdirSync(dir);
+  files.forEach(file => {
+    requestMapping.scanController(app, file, config.apiPrefix, [middleware.jwt(config.jwt)])
+  })
+
+  // 用户
+  // requestMapping.scanController(app, 'user', config.apiPrefix, [middleware.jwt(config.jwt)]);
+  // // 菜单权限
+  // requestMapping.scanController(app, 'menu', config.apiPrefix, [middleware.jwt(config.jwt)]);
+  // // 试卷
+  // requestMapping.scanController(app, 'paper', config.apiPrefix, [middleware.jwt(config.jwt)]);
+  // // 分类
+  // requestMapping.scanController(app, 'category', config.apiPrefix, [middleware.jwt(config.jwt)]);
 };
