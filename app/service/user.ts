@@ -25,6 +25,7 @@ export default class UserService extends Service {
       throw new BadRequestException("用户不存在");
     }
     const token = this.createdUserToken(query);
+    console.log('token---...', token);
     if(token !== user.token) {
       ctx.STATUS_CODE = HttpStatus.BAD_REQUEST;
       throw new BadRequestException("密码错误");

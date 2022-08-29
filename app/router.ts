@@ -29,12 +29,4 @@ export default (app: Application) => {
     requestMapping.scanController(app, file, config.apiPrefix, [middleware.jwt(config.jwt)])
   })
 
-  // 用户
-  // requestMapping.scanController(app, 'user', config.apiPrefix, [middleware.jwt(config.jwt)]);
-  // // 菜单权限
-  // requestMapping.scanController(app, 'menu', config.apiPrefix, [middleware.jwt(config.jwt)]);
-  // // 试卷
-  // requestMapping.scanController(app, 'paper', config.apiPrefix, [middleware.jwt(config.jwt)]);
-  // // 分类
-  // requestMapping.scanController(app, 'category', config.apiPrefix, [middleware.jwt(config.jwt)]);
 };

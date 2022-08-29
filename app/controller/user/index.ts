@@ -3,6 +3,7 @@ import{ Post, Control } from '../../lib/requestMapping/decorator/httpMethod.deco
 import { verificationInfoFormat } from '../../utils/index';
 import { BadRequestException } from '../../exception/badRequest.exception';
 import { HttpStatus } from '../../exception/httpStatus.enum';
+import { Body } from '../../lib/requestMapping/decorator/routerParams.decorator';
 
 @Control('user')
 export default class UserController extends Controller {
@@ -58,9 +59,8 @@ export default class UserController extends Controller {
    * 新增用户
    **/
   @Post('add-users')
-  public async addUsers() {
+  public async addUsers(@Body() body) {
     const { ctx } = this;
-    const { body } = ctx.request;
     // 校验参数格式
     verificationInfoFormat(['name', 'email', 'password'],body, ctx);
     // 校验用户名是否重复
