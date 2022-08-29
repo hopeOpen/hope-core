@@ -21,9 +21,10 @@ export default function ResponseFormatMiddleware() {
         message: '服务器错误',
       };
     } else if (ctx.body !== undefined && !ctx.noResponseFormat) {
+      const status = ctx.body.status;
       ctx.status = ctx.status === 204 ? 200 : ctx.status;
       ctx.body = {
-        code: ctx.STATUS_CODE || 200,
+        code: ctx.STATUS_CODE || (status && status !== 200) ? status : 200,
         data: ctx.body,
         message: 'success',
       };

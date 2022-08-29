@@ -5,8 +5,12 @@ export default (app) => {
     id: { type: INTEGER, primaryKey: true, autoIncrement: true },
     // 题目名称
     topic: STRING(255),
+    // 所属试题分类
+    categoryType: INTEGER,
     // 题目类型
-    type: INTEGER,
+    topicType: INTEGER,
+    // 题目难度
+    level: INTEGER,
     // 题目选项
     options: STRING(255),
     // 题目答案
