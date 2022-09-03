@@ -1,12 +1,12 @@
 export default (app) => {
-  const { STRING, INTEGER, DATE, NOW } = app.Sequelize;
+  const { STRING, INTEGER, DATE, NOW, TEXT } = app.Sequelize;
 
   const Question = app.model.define('questions', {
     id: { type: INTEGER, primaryKey: true, autoIncrement: true },
     // 题目名称
-    topic: STRING(255),
+    topic: TEXT('long'),
     // 所属试题分类
-    categoryType: INTEGER,
+    categoryId: INTEGER,
     // 题目类型
     topicType: INTEGER,
     // 题目难度

@@ -9,16 +9,15 @@ export default function ResponseFormatMiddleware() {
   return async (ctx: Context, next: any) => {
     await next();
     // 异常捕获
-    if(!ctx.body) {
+    if(!ctx.body || ctx.body.__proto__ == TypeError.prototype || ctx.body.__proto__ == Error.prototype) {
       ctx.body = {
         code: 500,
-        message: '服务器错误'
-      };
-    } else if(ctx.body.__proto__ == TypeError.prototype || ctx.body.__proto__ == Error.prototype) {
-      ctx.body = {
-        code: 500,
-        // message: ctx.body.message,
         message: '服务器错误',
+      };
+    } else if(/Sequelize(.*?)Error/gi.test(ctx.body.name)) {
+      ctx.body = {
+        code: 500,
+        message: '数据库错误',
       };
     } else if (ctx.body !== undefined && !ctx.noResponseFormat) {
       const status = ctx.body.status;

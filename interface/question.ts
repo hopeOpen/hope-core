@@ -7,7 +7,7 @@ interface OptionsType {
 // 新增题目格式
 export interface QuestionType {
   // 试题分类
-  categoryType: number;
+  categoryId: number;
   // 题目分类
   topicType: number;
   // 题目
@@ -20,4 +20,18 @@ export interface QuestionType {
   parsing: string;
   // 难度: 0-容易 1-中等 2-困难
   level: number
+}
+
+// 筛选题目参数
+export interface QuestionFilterType {
+  // 试题分类
+  categoryId: number | string;
+  // 难易程度
+  level: number | string;
+  // 题目类型
+  topicType: number | string;
+  // 题目名称
+  topic: string;
+  pageSize: number;
+  pageNum: number;
 }
