@@ -94,4 +94,40 @@ export default class PaperService extends Service {
     }
     return result;
   }
+
+  /**
+   * 题目详情
+   * @param id
+   */
+  public async getQuestionDetail(id: number) {
+    const { ctx } = this;
+    const result = await ctx.model.Question.findOne({
+      attributes: [ 'id', 'categoryId', 'correctOption', 'level',
+        'options', 'parsing', 'topic', 'topicType' ],
+      where: {
+        id,
+      },
+    });
+    if (!result) {
+      throw new BadRequestException('题目不存在');
+    }
+    return result;
+  } 
+
+  /**
+   * 修改题目
+   * @param {QuestionType} query 
+   */
+  public async updateQuestion(query: QuestionType) {
+    const { ctx } = this;
+    const result = await ctx.model.Question.update(query, {
+      where: {
+        id: query.id,
+      },
+    });
+    if (!result) {
+      throw new BadRequestException('修改题目失败');
+    }
+    return result;
+  }
 }
