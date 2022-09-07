@@ -37,6 +37,14 @@ export default (appInfo: EggAppInfo) => {
     },
   };
 
+  config.cluster = {
+    listen: {
+      path: '',
+      port: 8619,
+      hostname: '0.0.0.0',
+    }
+  };
+
   // 自定义 token 的加密条件字符串
   config.jwt = {
     secret: process.env.JWT_SECRET,
