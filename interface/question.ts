@@ -6,6 +6,7 @@ interface OptionsType {
 
 // 新增题目格式
 export interface QuestionType {
+  id?: number;
   // 试题分类
   categoryId: number;
   // 题目分类
