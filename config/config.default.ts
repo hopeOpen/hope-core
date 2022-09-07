@@ -39,9 +39,8 @@ export default (appInfo: EggAppInfo) => {
 
   config.cluster = {
     listen: {
-      path: '',
       port: 8619,
-      hostname: '0.0.0.0',
+      hostname: 'localhost',
     }
   };
 
