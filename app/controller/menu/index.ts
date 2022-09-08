@@ -1,5 +1,5 @@
 import { Controller } from "egg";
-import { Get, Control } from "../../lib/requestMapping/decorator/httpMethod.decorator";
+import { Get, Control, Post } from "../../lib/requestMapping/decorator/httpMethod.decorator";
 
 @Control('menu')
 export default class MenuController extends Controller {
@@ -61,5 +61,15 @@ export default class MenuController extends Controller {
         url: "",
       }
     ];
+  }
+
+  /**
+   * 获取页面集合
+   */
+  @Post("config")
+  public async getMenuConfig() {
+    const { ctx } = this;
+    const result = await ctx.service.menu.getMenuConfig();
+    return result;
   }
 }
