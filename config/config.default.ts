@@ -40,7 +40,8 @@ export default (appInfo: EggAppInfo) => {
   config.cluster = {
     listen: {
       port: 8619,
-      hostname: '127.0.0.1',
+      // 0.0.0.0 表示监听所有网卡 部署后可以被外网访问
+      hostname: '0.0.0.0',
     }
   };
 
