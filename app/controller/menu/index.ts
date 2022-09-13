@@ -1,5 +1,8 @@
 import { Controller } from "egg";
 import { Get, Control, Post } from "../../lib/requestMapping/decorator/httpMethod.decorator";
+import { Body } from "../../lib/requestMapping/decorator/routerParams.decorator";
+import { MenuConfigType } from '../../../interface/menu';
+import { BadRequestException } from "../../exception/badRequest.exception";
 
 @Control('menu')
 export default class MenuController extends Controller {
@@ -71,5 +74,22 @@ export default class MenuController extends Controller {
     const { ctx } = this;
     const result = await ctx.service.menu.getMenuConfig();
     return result;
+  }
+
+  /**
+   * 新增页面
+   */
+  @Post("add")
+  public async addMenu(@Body() body: MenuConfigType) {
+    const { ctx } = this;
+    const { index } = body;
+    if (!index) {
+      throw new BadRequestException("index is required");
+    }
+    // 校验是否名称重复
+    await ctx.service.menu.checkMenuNameExist(body.name);
+    // 校验sign是否重复
+    await ctx.service.menu.checkMenuSignExist(body.sign);
+    return await ctx.service.menu.addMenu(body);
   }
 }

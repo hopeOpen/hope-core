@@ -1,4 +1,6 @@
 import { Service } from 'egg';
+import { MenuConfigType } from '../../interface/menu';
+import { BadRequestException } from '../exception/badRequest.exception';
 
 export default class MenuService extends Service {
   /**
@@ -69,5 +71,47 @@ export default class MenuService extends Service {
         ]
       }
     ]
+  }
+
+  /**
+   * 新增页面
+   */
+  public async addMenu(body: MenuConfigType) {
+    const { ctx }  = this;
+    const result = await ctx.model.Menu.create(body);
+    if (!result) {
+      throw new BadRequestException('新增页面失败');
+    }
+    return result;
+  }
+
+  /**
+   * 校验页面名称是否存在
+   */
+  public async checkMenuNameExist(name: string) {
+    const { ctx }  = this; 
+    const result = await ctx.model.Menu.findOne({
+      while: {
+        name
+      }
+    });
+    if (result) {
+      throw new BadRequestException('页面名称已存在');
+    }
+  }
+
+  /**
+   * 校验页面标识是否存在
+   */
+  public async checkMenuSignExist(sign: string) {
+    const { ctx }  = this; 
+    const result = await ctx.model.Menu.findOne({
+      while: {
+        sign
+      }
+    });
+    if (result) {
+      throw new BadRequestException('页面标识已存在');
+    }
   }
 }
