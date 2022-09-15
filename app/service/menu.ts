@@ -7,70 +7,44 @@ export default class MenuService extends Service {
    * 获取用户菜单
    */
   public async getMenus() {
-  
+    
   }
 
   /**
    * 获取所有页面配置
    */
-  public getMenuConfig() {
-    return [
-      {
-        name: "首页",
-        sign: "manage.menu.index",
-        url: "",
-      },
-      {
-        name: "管理中心",
-        sign: "manage.menu.management",
-        url: "",
-        subMenus: [
-          {
-            name: "个人中心",
-            parent: "manage.menu.management",
-            sign: "manage.menu.personalCenter",
-            url: "",
-          },
-          {
-            name: "用户管理",
-            parent: "manage.menu.management",
-            sign: "manage.menu.userManagement",
-            url: "",
-          },
-          {
-            name: "角色管理",
-            parent: "manage.menu.management",
-            sign: "manage.menu.roleManagement",
-            url: "",
-          }
-        ]
-      },
-      {
-        name: '学期准备',
-        sign: 'manage.menu.paper',
-        url: "",
-        subMenus: [
-          {
-            name: '试卷管理',
-            parent: "manage.menu.paper",
-            sign: 'manage.menu.testPaperManage',
-            url: "",
-          },
-          {
-            name: '题目管理',
-            parent: "manage.menu.paper",
-            sign: 'manage.menu.testQuestion',
-            url: "",
-          },
-          {
-            name: '题库管理',
-            parent: "manage.menu.paper",
-            sign: 'manage.menu.questionBank',
-            url: "",
-          }
-        ]
+  public async getMenuConfig() {
+    const { ctx }  = this;
+    const result = await ctx.model.Menu.findAll({
+      attributes: ['id', 'name', 'sign', 'index', 'parentId']
+    });
+    if (!result) {
+      throw new BadRequestException('获取页面配置失败');
+    }
+    // 处理分级
+    const data = JSON.parse(JSON.stringify(result));
+    const obj: any = {};
+    const itemMap = new Map(data.map(node => [node.id, node]));
+    data.forEach((item) => {
+      const parent: any = itemMap.get(Number(item.parentId)) || obj;
+      !parent.subMenus && (parent['subMenus'] = []);
+      parent.subMenus.push(item)
+    });
+    const menus = obj.subMenus.filter((item) => !item.parentId);
+
+    // 排序
+    menus.sort((a, b) => {
+      // 二级菜单也需要排序
+      if(a.subMenus) {
+        a.subMenus.sort((childA, childB) => childA.index - childB.index);
       }
-    ]
+      if(b.subMenus) {
+        b.subMenus.sort((childA, childB) => childA.index - childB.index);
+      }
+      return a.index - b.index;
+    });
+
+    return menus;
   }
 
   /**
@@ -88,14 +62,14 @@ export default class MenuService extends Service {
   /**
    * 校验页面名称是否存在
    */
-  public async checkMenuNameExist(name: string) {
+  public async checkMenuNameExist(name: string, id?: number) {
     const { ctx }  = this; 
     const result = await ctx.model.Menu.findOne({
-      while: {
+      where: {
         name
       }
     });
-    if (result) {
+    if (result && result.id !== id) {
       throw new BadRequestException('页面名称已存在');
     }
   }
@@ -103,15 +77,37 @@ export default class MenuService extends Service {
   /**
    * 校验页面标识是否存在
    */
-  public async checkMenuSignExist(sign: string) {
+  public async checkMenuSignExist(sign: string, id?: number) {
     const { ctx }  = this; 
     const result = await ctx.model.Menu.findOne({
-      while: {
+      where: {
         sign
       }
     });
-    if (result) {
+    if (result && result.id !== id) {
       throw new BadRequestException('页面标识已存在');
     }
+  }
+
+  /**
+   * 更新页面配置
+   */
+  public async updateMenu(body: MenuConfigType) {
+    const { ctx }  = this;
+    const result = await ctx.model.Menu.update(body, {
+      where: {
+        id: body.id
+      }
+    });
+    if (!result) {
+      throw new BadRequestException('更新页面配置失败');
+    }
+    // TODO: index 同步修改
+    return await ctx.model.Menu.findOne({
+      where: {
+        id: body.id
+      },
+      attributes: ['id', 'name', 'sign', 'index', 'parentId']
+    });
   }
 }

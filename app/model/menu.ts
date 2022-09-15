@@ -10,7 +10,7 @@ export default (app) => {
     // 顺序下标
     index: INTEGER,
     // 父级菜单id
-    parentId: INTEGER,
+    parentId: STRING(255),
     // 页面地址
     url: STRING(255),
     // 描述
