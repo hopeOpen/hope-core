@@ -83,7 +83,7 @@ export default class MenuController extends Controller {
   public async addMenu(@Body() body: MenuConfigType) {
     const { ctx } = this;
     const { index } = body;
-    if (!index) {
+    if (!index && index !== 0) {
       throw new BadRequestException("index is required");
     }
     // 校验是否名称重复
@@ -91,5 +91,25 @@ export default class MenuController extends Controller {
     // 校验sign是否重复
     await ctx.service.menu.checkMenuSignExist(body.sign);
     return await ctx.service.menu.addMenu(body);
+  }
+
+  /**
+   * 更新页面
+   */
+  @Post("update")
+  public async updateMenu(@Body() body: MenuConfigType) {
+    const { ctx } = this;
+    const { id, index } = body;
+    if (!id) {
+      throw new BadRequestException("id is required");
+    }
+    if (!index && index !== 0) {
+      throw new BadRequestException("index is required");
+    }
+    // 校验是否名称重复
+    await ctx.service.menu.checkMenuNameExist(body.name, id);
+    // 校验sign是否重复
+    await ctx.service.menu.checkMenuSignExist(body.sign, id);
+    return await ctx.service.menu.updateMenu(body);
   }
 }
