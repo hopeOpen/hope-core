@@ -100,7 +100,12 @@ export default (appInfo: EggAppInfo) => {
       underscored: true,
     },
     operatorsAliases: {
+      // 模糊搜索别名
       $link: Op.like,
+      // 大于
+      $gt: Op.gt,
+      // 大于等于
+      $gte: Op.gte,
     },
   };
 

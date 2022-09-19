@@ -112,4 +112,26 @@ export default class MenuController extends Controller {
     await ctx.service.menu.checkMenuSignExist(body.sign, id);
     return await ctx.service.menu.updateMenu(body);
   }
+
+  /**
+   * 批量修改页面index
+   */
+  @Post('updateIndex')
+  public async updateMenuIndex(@Body() body: { id: number, index: number, parentId: number }[]) {
+    const { ctx } = this;
+    return await ctx.service.menu.updateMenuIndex(body);
+  }
+
+  /**
+   * 删除页面配置
+   */
+  @Post('delete')
+  public async deleteMenu(@Body() body: { id: number, index: number, parentId: number }) {
+    const { ctx } = this;
+    const { id, index, parentId } = body;
+    if(!id) {
+      throw new BadRequestException("id is required");
+    }
+    return await ctx.service.menu.deleteMenu({ id, index, parentId });
+  }
 }
