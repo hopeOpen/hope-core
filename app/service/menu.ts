@@ -48,18 +48,6 @@ export default class MenuService extends Service {
   }
 
   /**
-   * 新增页面
-   */
-  public async addMenu(body: MenuConfigType) {
-    const { ctx }  = this;
-    const result = await ctx.model.Menu.create(body);
-    if (!result) {
-      throw new BadRequestException('新增页面失败');
-    }
-    return result;
-  }
-
-  /**
    * 校验页面名称是否存在
    */
   public async checkMenuNameExist(name: string, id?: number) {
@@ -89,6 +77,26 @@ export default class MenuService extends Service {
     }
   }
 
+
+  /**
+   * 新增页面
+   */
+  public async addMenu(body: MenuConfigType) {
+    const { ctx }  = this;
+    const { parentId = '', index } = body;
+    // 检查是否存在相同index 有的话需更新其他index
+    const oldPageData = await this.findIndexPage(parentId, index);
+    if(oldPageData) {
+      await this.handleOtherPageIndex(index, parentId, 'add');
+    }
+    const result = await ctx.model.Menu.create(body);
+    if (!result) {
+      throw new BadRequestException('新增页面失败');
+    }
+    return result;
+  }
+
+
   /**
    * 更新页面配置
    */
@@ -102,12 +110,125 @@ export default class MenuService extends Service {
     if (!result) {
       throw new BadRequestException('更新页面配置失败');
     }
-    // TODO: index 同步修改
     return await ctx.model.Menu.findOne({
       where: {
         id: body.id
       },
       attributes: ['id', 'name', 'sign', 'index', 'parentId']
     });
+  }
+
+  /**
+   * 批量修改页面index 
+   */
+  public async updateMenuIndex(body: {id: number, index: number, parentId: number}[]) {
+    console.log('body', body);
+  }
+
+  /**
+   * @param data 当前页面数据
+   * @param.id 当前页面id
+   * @param.index 当前页面index
+   * @param.parentId 当前页面父级id
+   * 删除页面配置
+   */
+  public async deleteMenu(data: {id: number, index: number, parentId: number}) {
+    const { id, index, parentId } = data;
+    const { ctx } = this;
+    const result  = await ctx.model.Menu.destroy({
+      where: {
+        id
+      }
+    })
+    if(!result) {
+      throw new BadRequestException('删除失败');
+    }
+    // 如果有子页面 则同时删除子页面
+    if (!parentId) {
+      const childPageData = await ctx.model.Menu.findAll({
+        where: {
+          parentId: id
+        }
+      });
+      await ctx.model.Menu.destroy({
+        where: {
+          id: childPageData.map(item => {
+            return item.dataValues.id;
+          })
+        }
+      })
+    }
+    await this.handleOtherPageIndex(index, parentId, 'delete');
+    return result;
+  }
+
+  /**
+   * @param parentId 父级id
+   * @param index 当前页面index
+   * 根据index找page
+   */
+  public async findIndexPage(parentId: number | string, index: number) {
+    const { ctx } = this;
+    const result = await ctx.model.Menu.findOne({
+      where: {
+        parentId,
+        index
+      }
+    });
+    return result;
+  }
+
+  /**
+   * 同一父级下其他的页面
+   * @param index 
+   * @param parentId 
+   * @returns 
+   */
+  public async handleOtherPageIndex(index: number, parentId: number | string, type: string) {
+    const { ctx } = this;
+    // 查找其余页面进行处理
+    const otherPageData = await ctx.model.Menu.findAndCountAll({
+      where: {
+        parentId,
+        index: {
+          $gte: index
+        }
+      }
+    });
+    // 更新其余页面index
+    if(otherPageData.count) {
+      this.updatePageIndex(otherPageData.rows, index, type);
+    }
+  }
+
+  /**
+   * 更新菜单顺序
+   * @param otherData 其余页面数据
+   * @param index 当前页面index
+   * @param type 操作类型
+   */
+  async updatePageIndex(otherData: any, currentIndex: number, type: string) {
+    try {
+      console.log('updatePageIndex=->', otherData, type);
+      // 过滤只需要id index
+      otherData = otherData.map((item) => {
+        const { id, index } = item.dataValues;
+        return { id, index };
+      });
+      // 从小到大排序
+      otherData.sort((a, b) => a.index - b.index);
+      // add时需要额外+1
+      const extraValue = type === 'add' ? 1 : 0;
+      otherData.forEach((item, index) => {
+        item.index = index + currentIndex + extraValue;
+      });
+      console.log('otherData--', otherData);
+
+      const { ctx } = this;
+      // 批量更新
+      ctx.model.Menu.bulkCreate(otherData, { updateOnDuplicate: [ 'id', 'index' ] })
+    } catch (error) {
+      throw new BadRequestException('删除成功，但更新顺序失败');
+    }
   }
 }
