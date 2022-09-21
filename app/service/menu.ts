@@ -7,7 +7,10 @@ export default class MenuService extends Service {
    * 获取用户菜单
    */
   public async getMenus() {
-    
+    const { ctx } = this;
+    return await ctx.model.Menu.findAll({
+      attributes: ['id', 'name', 'sign', 'index', 'parentId']
+    });
   }
 
   /**
@@ -30,7 +33,7 @@ export default class MenuService extends Service {
       !parent.subMenus && (parent['subMenus'] = []);
       parent.subMenus.push(item)
     });
-    const menus = obj.subMenus.filter((item) => !item.parentId);
+    const menus = obj.subMenus?.filter((item) => !item.parentId) || [];
 
     // 排序
     menus.sort((a, b) => {
