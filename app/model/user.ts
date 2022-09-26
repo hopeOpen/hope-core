@@ -48,6 +48,7 @@ module.exports = app => {
   return Users;
 };
 
+
 /*
   defaultValue 设置默认  Boolean
   allowNull 是否允许为空 Boolean

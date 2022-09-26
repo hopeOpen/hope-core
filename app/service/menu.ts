@@ -5,10 +5,39 @@ import { BadRequestException } from '../exception/badRequest.exception';
 export default class MenuService extends Service {
   /**
    * 获取用户菜单
+   * @param roles 角色id集合
    */
-  public async getMenus() {
+  public async getMenus(roles: number[]) {
+    if (!roles || !roles.length) {
+      return [];
+    }
     const { ctx } = this;
+    const rolesData = await ctx.model.Roles.findAll({
+      where: {
+        id: roles
+      }
+    });
+    if (!rolesData || !rolesData.length) {
+      throw new BadRequestException('无角色权限');
+    }
+    // 查询长度不一致 需更新用户角色权限长度例如 删除了角色，用户还有该角色
+    if (roles.length !== rolesData.length) {
+      this.updateUserRoles(rolesData);
+    }
+    // 获取菜单id集合
+    const menuConfig = rolesData.reduce((arr, item) => {
+      const menuIds = JSON.parse(item.dataValues.menuConfig);
+      menuIds.forEach((id: number) => {
+        if (arr.includes(id)) return;
+        arr.push(id)
+      })
+      return arr;
+    }, []);
+
     return await ctx.model.Menu.findAll({
+      where: {
+        id: menuConfig
+      },
       attributes: ['id', 'name', 'sign', 'index', 'parentId']
     });
   }
@@ -212,7 +241,6 @@ export default class MenuService extends Service {
    */
   async updatePageIndex(otherData: any, currentIndex: number, type: string) {
     try {
-      console.log('updatePageIndex=->', otherData, type);
       // 过滤只需要id index
       otherData = otherData.map((item) => {
         const { id, index } = item.dataValues;
@@ -225,7 +253,6 @@ export default class MenuService extends Service {
       otherData.forEach((item, index) => {
         item.index = index + currentIndex + extraValue;
       });
-      console.log('otherData--', otherData);
 
       const { ctx } = this;
       // 批量更新
@@ -233,5 +260,20 @@ export default class MenuService extends Service {
     } catch (error) {
       throw new BadRequestException('删除成功，但更新顺序失败');
     }
+  }
+
+  // 查询长度不一致 需更新用户角色权限长度例如 删除了角色，用户还有该角色
+  async updateUserRoles(rolesData: any) {
+    const ids = rolesData.map((item: any) => {
+      return item.dataValues.id;
+    });
+    const { ctx } = this;
+    const { name, token } = ctx.userInfo;
+    await ctx.model.User.update({roles: JSON.stringify(ids)}, {
+      where: {
+        name,
+        token
+      }
+    })
   }
 }

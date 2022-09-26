@@ -7,12 +7,17 @@ import { BadRequestException } from "../../exception/badRequest.exception";
 @Control('menu')
 export default class MenuController extends Controller {
   /**
-   * 获取用户菜单 TODO: 未完成 更具角色权限返回
+   * 获取用户菜单
    */
   @Get("permission")
   public async getMenus() {
     const { ctx } = this;
-    return await ctx.service.menu.getMenus();
+    
+    const { name, token } = ctx.userInfo;
+    // 获取用户信息
+    const userData = await ctx.service.user.getUserInfo({name, token});
+    const { roles } = userData;
+    return await ctx.service.menu.getMenus(roles);
   }
 
   /**
