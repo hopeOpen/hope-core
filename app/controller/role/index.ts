@@ -10,7 +10,7 @@ export default class RoleController extends Controller {
    * 获取角色列表
    */
   @Post()
-  public async getRoles(@Body() body: { pageNum: number, pageSize: number }) {
+  public async getRoles(@Body() body: { pageNum?: number, pageSize?: number }) {
     const { ctx } = this;
     return await ctx.service.role.getRoles(body);
   }
@@ -51,5 +51,21 @@ export default class RoleController extends Controller {
     return await ctx.service.role.deleteRole(ids);
   }
 
-
+  /**
+   * 更新角色
+   */
+  @Post('update')
+  public async updateRole(@Body() body: { id: number, roleName: string, menuConfig: number[], description: string }) {
+    const { ctx } = this;
+    const { id, roleName, menuConfig, description } = body;
+    if (!roleName.trim()) {
+      throw new BadRequestException('角色名称不能为空');
+    }
+    if (!menuConfig.length) {
+      throw new BadRequestException('角色权限至少有一项');
+    }
+    // 判断角色是否存在
+    await ctx.service.role.checkRole([id])
+    return await ctx.service.role.updateRole({ id, roleName, menuConfig: JSON.stringify(menuConfig), description });
+  }
 }

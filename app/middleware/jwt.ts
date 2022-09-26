@@ -26,6 +26,7 @@ module.exports = () => {
         // 获取加密的cookie,要加上{encrypt:true}
         encrypt: true
       });
+      
       if (!token) {
         throwError(ctx, '未登录， 请先登录');
       } else { // 当前token值存在
@@ -41,7 +42,7 @@ module.exports = () => {
             return decoded;
           }
         });
-
+        
         if (decode === 'TokenExpiredError') {
           throwError(ctx, '登录过期, 请重新登录');
         }
@@ -49,6 +50,8 @@ module.exports = () => {
         if (decode === 'JsonWebTokenError') {
           throwError(ctx, '凭证无效, 请重新登录');
         }
+        // 用户信息挂载在ctx上
+        ctx.userInfo = decode;
         await next();
       }
     }

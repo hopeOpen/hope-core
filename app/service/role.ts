@@ -8,13 +8,15 @@ export default class MenuService extends Service {
   /**
    * 获取用户菜单
    */
-  public async getRoles(body: { pageNum: number, pageSize: number }) {
+  public async getRoles(body: { pageNum?: number, pageSize?: number }) {
     const { ctx } = this;
     const { pageSize, pageNum } = body;
+    const where = {};
+    pageSize ? where['limit'] = pageSize : '';
+    pageNum ? where['offset'] = (pageNum - 1) * pageSize : '';
     const result =  await ctx.model.Roles.findAndCountAll({
       attributes: ['id', 'roleName', 'menuConfig', 'description'],
-      limit: pageSize,
-      offset: (pageNum - 1) * pageSize
+      ...where
     });
     return {
       list: result.rows,
@@ -79,6 +81,22 @@ export default class MenuService extends Service {
     });
     if (!result) {
       throw new BadRequestException('删除角色失败');
+    }
+    return result;
+  }
+
+  /**
+   * 更新角色
+   */
+  public async updateRole(body: { id: number, roleName: string, menuConfig: string, description: string }) {
+    const { ctx } = this;
+    const result = await ctx.model.Roles.update(body, {
+      where: {
+        id: body.id
+      }
+    });
+    if (!result) {
+      throw new BadRequestException('更新角色失败');
     }
     return result;
   }

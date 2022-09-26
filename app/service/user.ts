@@ -13,11 +13,11 @@ export default class UserService extends Service {
    */
   public async login(query: LoginQuery) {
     const { ctx } = this;
-    const { name:username } = query;
+    const { name } = query;
     // 判断用户是否存在
     const user = await ctx.model.User.findOne({
       where: {
-        name: username
+        name
       }
     })
     if(!user) {
@@ -165,6 +165,33 @@ export default class UserService extends Service {
   createdUserToken(body: { name: string, password: string }) {
     const { name, password } = body;
     return SHA256(`${name}/${password}/${this.ctx.app.config.jwt.secret}`).toString();
+  }
+
+  /**
+   * 获取用户信息
+   */
+  public async getUserInfo(data: any) {
+    const { ctx } = this;
+    const where: any = {}
+    if(data.id) {
+      where.id = data.id;
+    }
+    if(data.name) {
+      where.name = data.name;
+    }
+    if(data.token) {
+      where.token = data.token;
+    }
+    const user = await ctx.model.User.findOne({
+      where,
+      attributes: [ 'id', 'name', 'email', 'roles', 'desc' ],
+    });
+    if(!user) {
+      ctx.STATUS_CODE = HttpStatus.BAD_REQUEST;
+      throw new BadRequestException("用户不存在");
+    }
+    user.roles = JSON.parse(user.roles);
+    return user;
   }
 
 }
