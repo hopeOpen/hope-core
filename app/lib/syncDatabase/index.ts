@@ -34,7 +34,6 @@ export class SyncDatabase {
     if (!result || !result.length) {
       this.app.logger.info("init user ---> start");
       const rolesData = await this.app.model.Roles.findAll();
-
       const defaultUserInfo = {
         token: createdUserToken(
           { name: "admin", password: "abcd1234" },
@@ -68,13 +67,17 @@ export class SyncDatabase {
           description: "超级管理员",
         },
       ];
-      defaultRoles.forEach(async (role) => {
+      defaultRoles.forEach(async (role, index) => {
         await this.app.model.Roles.create(role);
+        if(index === defaultRoles.length - 1) {
+          // 3
+          await this.createDefaultUser();
+        }
       });
       this.app.logger.info("init roles ---> end");
+    } else {
+      this.createDefaultUser();
     }
-    // 3
-    this.createDefaultUser();
   }
 
   /**
@@ -151,7 +154,7 @@ export class SyncDatabase {
     // 判断数据库中具有默认数据
     if (!result || !result.length) {
       this.app.logger.info("init menus ---> start");
-      defaultMenus.forEach(async (menu) => {
+      defaultMenus.forEach(async (menu, index) => {
         const data = await this.app.model.Menu.create(menu);
         if (menu.children) {
           menu.children.forEach(async (child) => {
@@ -159,10 +162,15 @@ export class SyncDatabase {
             await this.app.model.Menu.create(child);
           });
         }
+        
+        if(index === defaultMenus.length - 1) {
+          // 2
+          await this.createRoles();
+        }
       });
       this.app.logger.info("init menus ---> end");
+    } else {
+      this.createRoles();
     }
-    // 2
-    this.createRoles();
   }
 }
