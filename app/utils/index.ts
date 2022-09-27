@@ -1,6 +1,7 @@
 import { Context } from "egg";
 import { OperationNotAllowedException } from "../exception/operateNotAllowed.exception";
 import { HttpStatus } from '../exception/httpStatus.enum';
+import { SHA256 } from 'crypto-js';
 
 // 是否为空对象
 export const isEmptyObject = (val: object) => {
@@ -51,4 +52,14 @@ export const getDataType = (obj:any) => {
   // return Object.prototype.toString.call(obj).replace(/^\[object (\S+)\]$/, '$1'); 
   return Object.prototype.toString.call(obj).slice(8, -1).toLowerCase()
 }
+
+  /**
+   * 生成token 用户名+密码
+   * @param body 
+   */
+export const createdUserToken = (body: { name: string, password: string }, secret: string) => {
+    const { name, password } = body;
+    return SHA256(`${name}/${password}/${secret}`).toString();
+  
+  }
 
