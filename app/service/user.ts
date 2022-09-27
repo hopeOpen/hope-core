@@ -2,8 +2,8 @@ import { Service } from 'egg';
 import { LoginQuery, UserInfo, UpdateUserInfoType } from '../../interface/user';
 import { ParamFormatErrorException } from '../exception/paramFormatError.exception'
 import { BadRequestException } from '../exception/badRequest.exception';
-import { SHA256 } from 'crypto-js';
 import { HttpStatus } from '../exception/httpStatus.enum';
+import { createdUserToken } from '../utils';
 /**
  * User Service
  */
@@ -24,7 +24,7 @@ export default class UserService extends Service {
       ctx.STATUS_CODE = HttpStatus.BAD_REQUEST;
       throw new BadRequestException("用户不存在");
     }
-    const token = this.createdUserToken(query);
+    const token = createdUserToken(query, this.ctx.app.config.jwt.secret);
     console.log('token---...', token);
     if(token !== user.token) {
       ctx.STATUS_CODE = HttpStatus.BAD_REQUEST;
@@ -40,7 +40,7 @@ export default class UserService extends Service {
   public async addUsers(body: UserInfo) {
     const { ctx } = this;
     // 密码生成md5 name+password+jwt.secret
-    body.token = this.createdUserToken(body);
+    body.token = createdUserToken(body, this.ctx.app.config.jwt.secret);
     body.roles = JSON.stringify(body.roles || []);
     return await ctx.model.User.create(body);
   }
@@ -156,15 +156,6 @@ export default class UserService extends Service {
         id: ids,
       },
     });
-  }
-
-  /**
-   * 生成token 用户名+密码
-   * @param body 
-   */
-  createdUserToken(body: { name: string, password: string }) {
-    const { name, password } = body;
-    return SHA256(`${name}/${password}/${this.ctx.app.config.jwt.secret}`).toString();
   }
 
   /**

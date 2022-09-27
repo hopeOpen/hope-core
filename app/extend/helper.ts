@@ -1,3 +1,5 @@
+
+
 export default {
   // 扁平分类转换树状结构
   flatToTree(list: any) {
