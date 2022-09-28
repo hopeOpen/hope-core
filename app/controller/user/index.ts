@@ -129,6 +129,15 @@ export default class UserController extends Controller {
     await ctx.service.user.deleteUser(body.ids);
     return '删除成功'
   }
+
+  /**
+   * 用户信息
+   */
+  @Post('info')
+  public async info() {
+    const { ctx } = this;
+    return ctx.userInfo;
+  }
   
 }
 
